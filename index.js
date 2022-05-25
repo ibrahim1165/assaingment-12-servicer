@@ -45,6 +45,19 @@ async function run() {
     const userCollection = client.db('garageTech').collection('user');
 
 
+    
+    const verifyAdmin = async(req, res, next)=>{
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({ email: requester });
+      if (requesterAccount.role === 'admin') {
+        next();
+      }
+      else {
+        res.status(403).send({ message: 'forbidden' });
+      }
+    }
+
+
     app.get('/service', async (req, res) => {
       const query = {};
       const curser = serviceCollection.find(query);
@@ -82,6 +95,16 @@ async function run() {
       const user = await userCollection.findOne({ email: email });
       const isAdmin = user.role === 'admin';
       res.send({ admin: isAdmin })
+    })
+
+    app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: { role: 'admin' },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
     })
 
 
