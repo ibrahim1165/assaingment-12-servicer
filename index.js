@@ -71,11 +71,17 @@ async function run() {
       const result = await curser.toArray()
       res.send(result);
     })
+    
+    app.post('/review',async (req, res) => {
+      const order = req.body;
+      const result = await reviewCollection.insertOne(order);
+      res.send(result);
+    });
 
 
    app.post('/service',async(req,res)=>{
-     const newuser = req.body;
-     const result = await serviceCollection.insertOne(newuser);
+     const newPost = req.body;
+     const result = await serviceCollection.insertOne(newPost);
      res.send(result);
    })
 
@@ -168,13 +174,19 @@ async function run() {
       res.send(orders);
     })
 
-   app.get('/order',verifyJWT, async(req, res) => {
+   app.get('/order', async(req, res) => {
+    const decodedEmail = req.decoded.email;
     const email = req.query.email;
-      const query = { email: email };
-      const curser = orderCollection.find(query)
-      const orders =await curser.toArray()
-      res.send(orders);
+    if(email === decodedEmail){
+        const query = { email: email };
+        const curser =orderCollection.find(query)
+        const orders = await curser.toArray()
+         res.send(orders);
+      }else{
+        return res.status(403).send({ message: 'forbidden access' });
+      }
    })
+
 
 
    app.delete('/order/:id', async(req,res)=>{
