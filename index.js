@@ -43,6 +43,7 @@ async function run() {
     const serviceCollection = client.db('garageTech').collection('service');
     const orderCollection = client.db('garageTech').collection('order');
     const userCollection = client.db('garageTech').collection('user');
+    const reviewCollection = client.db('reviews').collection('review');
 
 
     
@@ -64,16 +65,35 @@ async function run() {
       const result = await curser.toArray()
       res.send(result);
     })
+    app.get('/review', async (req, res) => {
+      const query = {};
+      const curser = reviewCollection.find(query);
+      const result = await curser.toArray()
+      res.send(result);
+    })
+
+
+   app.post('/service',async(req,res)=>{
+     const newuser = req.body;
+     const result = await serviceCollection.insertOne(newuser);
+     res.send(result);
+   })
+
+
     app.get('/service/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) }
       const result = await serviceCollection.findOne(query);
       res.send(result)
     })
+
+
     app.get('/user', verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
       res.send(users);
     })
+
+
     app.delete('/service/:id',async(req,res)=>{
       const id =req.params.id;
       const query = {_id:ObjectId(id)};
@@ -91,7 +111,7 @@ async function run() {
         $set: user,
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
-      const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3d' })
       res.send({ result, token });
     });
 
@@ -155,6 +175,14 @@ async function run() {
       const orders =await curser.toArray()
       res.send(orders);
    })
+
+
+   app.delete('/order/:id', async(req,res)=>{
+    const id =req.params.id;
+    const query = {_id:ObjectId(id)};
+    const result = await serviceCollection.deleteOne(query);
+    res.send(result);
+})
 
 
     app.get('/order', async (req, res) => {
