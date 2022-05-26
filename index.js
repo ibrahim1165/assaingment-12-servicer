@@ -174,17 +174,22 @@ async function run() {
       res.send(orders);
     })
 
-   app.get('/order', async(req, res) => {
-    const decodedEmail = req.decoded.email;
-    const email = req.query.email;
-    if(email === decodedEmail){
-        const query = { email: email };
-        const curser =orderCollection.find(query)
-        const orders = await curser.toArray()
-         res.send(orders);
-      }else{
-        return res.status(403).send({ message: 'forbidden access' });
-      }
+   app.get('/order/:email', async(req, res) => {
+     const email = req.params.email;
+     
+  orderCollection.find({email: email})
+  .toArray((err,docs)=>res.send(docs))
+
+
+    // const email = req.query.email;
+    // if(email ){
+    //     const query = { email: email };
+    //     const curser =orderCollection.find(query)
+    //     const orders = await curser.toArray()
+    //      res.send(orders);
+    //   }else{
+    //     return res.status(403).send({ message: 'forbidden access' });
+    //   }
    })
 
 
